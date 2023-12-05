@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "simple-raqa-bot"
+version = "0.1.0"
+description = ""
+authors = ["Harisyam Manda <NagaVenkataHarisyam.Manda@omv.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.12"
+openai = "^1.3.6"
+langchain = "^0.0.344"
+python-dotenv = "^1.0.0"
+pandas = "^2.1.3"
+lancedb = "^0.3.4"
+chainlit = "^0.7.700"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
