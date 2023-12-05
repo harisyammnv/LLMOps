@@ -10,7 +10,8 @@ import chainlit as cl
 import asyncio
 from dotenv import load_dotenv
 from chainlit.types import AskFileResponse
-from aimakerspace.openai_utils.chatmodel import ChatOpenAI
+from langchain.chat_models import ChatOpenAI
+from aimakerspace.openai_utils.chatmodel import ChatOpenAI as aiChat
 from langchain.chains import ConversationalRetrievalChain
 from langchain.document_loaders import PyMuPDFLoader
 import lancedb
@@ -43,7 +44,7 @@ table = db.create_table(
 )
 
 class RetrievalAugmentedQAPipeline:
-    def __init__(self, llm: ChatOpenAI(), 
+    def __init__(self, llm: aiChat(), 
                  vector_db_retriever: VectorDatabase,
                  raqa_prompt: str,
                  user_prompt: str) -> None:
@@ -77,7 +78,7 @@ def process_docs(file: AskFileResponse):
             pdf_loader = PyMuPDFLoader(tempfile.name)
             documents = pdf_loader.load()
             text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
-            split_documents = text_splitter.split_texts(documents)
+            split_documents = text_splitter.split_documents(documents)
             for i, doc in enumerate(split_documents):
                 doc.metadata["source"] = f"source_{i}"
             vector_db = LanceDB.from_documents(documents, embeddings, connection=table)
@@ -152,7 +153,7 @@ async def on_chat_start():
         cl.user_session.set("chain", chain)
 
     if file.name.endswith(".txt"):
-        chat_openai = ChatOpenAI()
+        chat_openai = aiChat()
         raqa_prompt = SystemRolePrompt(RAQA_PROMPT_TEMPLATE)
 
 
@@ -203,4 +204,4 @@ async def on_message(message: cl.Message):
                 answer += f"\nSources: {', '.join(source_names)}"
             else:
                 answer += "\nNo sources found"
-    
+        await cl.Message(content=answer, elements=text_elements).send()
